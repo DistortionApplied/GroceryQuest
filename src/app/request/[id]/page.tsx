@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import { TaskItem } from "@/components/TaskItem";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { getRequestById, getTasksByRequestId, updateTask, updateRequest, createTask, getUserById, updateUser, findRewardItem, calculateLevelFromXp, formatTimestampToEST, reorderTasksForRequest } from "@/lib/clientData";
+import { AchievementNotification } from "@/components/AchievementNotification";
+import { getRequestById, getTasksByRequestId, updateTask, updateRequest, createTask, getUserById, updateUser, findRewardItem, calculateLevelFromXp, formatTimestampToEST, reorderTasksForRequest, checkAchievementUnlock, awardAchievementXP, calculateUserStats, unlockAchievement, Achievement } from "@/lib/clientData";
 
 interface Task {
   id: number;
@@ -37,6 +38,7 @@ export default function RequestDetail() {
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
+  const [newAchievements, setNewAchievements] = useState<{ achievements: Achievement[], levelUp: boolean } | null>(null);
 
   useEffect(() => {
     if (!requestId) return;
@@ -109,9 +111,23 @@ export default function RequestDetail() {
            xp: newXp,
            level: newLevel,
          };
-         updateUser(updatedUser);
-       }
-     }
+          updateUser(updatedUser);
+
+          // Check for achievements
+          const stats = calculateUserStats(updatedUser);
+          const unlockedAchievements = checkAchievementUnlock(updatedUser, stats);
+          if (unlockedAchievements.length > 0) {
+            // Unlock achievements
+            unlockedAchievements.forEach(a => unlockAchievement(a.id));
+            // Award achievement XP
+            const userWithAchievementXP = awardAchievementXP(updatedUser, unlockedAchievements);
+            const levelUp = userWithAchievementXP.level > updatedUser.level;
+            updateUser(userWithAchievementXP);
+            // Show notification
+            setNewAchievements({ achievements: unlockedAchievements, levelUp });
+          }
+        }
+      }
 
      // Update request completion count
      const updatedAllTasks = getTasksByRequestId(parseInt(requestId!));
@@ -125,8 +141,24 @@ export default function RequestDetail() {
          isCompleted: isNowCompleted ? 1 : 0,
          completedAt: isNowCompleted ? (request.isCompleted === false ? new Date().toISOString() : request.completedAt) : undefined,
        };
-       updateRequest(updatedRequest as any);
-     }
+        updateRequest(updatedRequest as any);
+
+        // Check for list completion achievements
+        if (isNowCompleted && !request.isCompleted) {
+          const currentUser = getUserById(parseInt(localStorage.getItem('gamified_app_current_user_id') || '0'));
+          if (currentUser) {
+            const stats = calculateUserStats(currentUser);
+            const unlockedAchievements = checkAchievementUnlock(currentUser, stats);
+            if (unlockedAchievements.length > 0) {
+              unlockedAchievements.forEach(a => unlockAchievement(a.id));
+              const userWithAchievementXP = awardAchievementXP(currentUser, unlockedAchievements);
+              const levelUp = userWithAchievementXP.level > currentUser.level;
+              updateUser(userWithAchievementXP);
+              setNewAchievements(prev => prev ? { ...prev, achievements: [...prev.achievements, ...unlockedAchievements], levelUp: prev.levelUp || levelUp } : { achievements: unlockedAchievements, levelUp });
+            }
+          }
+        }
+      }
 
      // Refresh local state
      setTasks(prevTasks => prevTasks.map(t =>
@@ -219,7 +251,7 @@ export default function RequestDetail() {
 
   const getItemIcon = (type: string) => {
     const rewardItem = findRewardItem(type);
-    return rewardItem ? rewardItem.icon : "🎁";
+    return rewardItem ? rewardItem.icon : "🛒";
   };
 
   if (loading) {
@@ -357,6 +389,14 @@ export default function RequestDetail() {
             </p>
           </div>
         </div>
+      )}
+
+      {newAchievements && newAchievements.achievements.length > 0 && (
+        <AchievementNotification
+          achievements={newAchievements.achievements}
+          onDismiss={() => setNewAchievements(null)}
+          levelUp={newAchievements.levelUp}
+        />
       )}
     </div>
   );

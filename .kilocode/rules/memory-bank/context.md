@@ -16,6 +16,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Recipe system for common features
 - [x] Updated UI terminology from "Requests" to "Lists" for consistency (nav label, profile stats)
 - [x] Fixed PostCSS XSS vulnerabilities by adding resolutions to package.json
+- [x] Implemented achievements system with XP rewards, unlock notifications, and collapsible mobile-friendly UI
 
 ## Current Structure
 
@@ -89,3 +90,4 @@ export async function GET() {
 | Initial | Template created with base setup |
 | 2026-05-05 | Updated UI labels from "Requests" to "Lists" in mobile navigation and profile statistics for consistency |
 | 2026-05-05 | Added package.json resolutions to force update PostCSS and resolve XSS vulnerabilities |
+| 2026-05-05 | Implemented achievements system: added Achievement types and storage, AchievementNotification and AchievementGrid components, integrated checking logic after task/list actions, updated profile page with collapsible achievements section

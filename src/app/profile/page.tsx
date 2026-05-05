@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { XPBar } from "@/components/XPBar";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
-import { getCurrentUser, getRequestsForCurrentUser, getUsers, switchToUser, deleteUser, deleteCurrentProfile, getXpForNextLevel, getLevelTitle, setCurrentUserId } from "@/lib/clientData";
+import { AchievementGrid } from "@/components/AchievementGrid";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { NotificationModal } from "@/components/NotificationModal";
+import { getCurrentUser, getRequestsForCurrentUser, getUsers, switchToUser, deleteUser, deleteCurrentProfile, getXpForNextLevel, getLevelTitle, setCurrentUserId, getAchievements, getUnlockedAchievements } from "@/lib/clientData";
 
 interface User {
   id: number;
@@ -23,6 +26,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [showProfileSwitcher, setShowProfileSwitcher] = useState(false);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [clearDataConfirm, setClearDataConfirm] = useState(false);
+  const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
 
   const loadProfileData = () => {
     try {
@@ -113,7 +118,7 @@ export default function Profile() {
       if (switchedUser) {
         loadProfileData(); // Reload data for new user
         setShowProfileSwitcher(false);
-        alert(`Switched to profile: ${switchedUser.name}`);
+        setNotification({ title: 'Profile Switched', message: `Switched to profile: ${switchedUser.name}` });
       }
     } catch (error) {
       console.error("Error switching profile:", error);
@@ -132,7 +137,7 @@ export default function Profile() {
         deleteUser(userId);
         setAllUsers(getUsers()); // Refresh user list
         loadProfileData(); // Reload current profile data
-        alert("Profile deleted successfully.");
+        setNotification({ title: 'Profile Deleted', message: 'Profile deleted successfully.' });
       } catch (error) {
         console.error("Error deleting profile:", error);
         alert("Failed to delete profile.");
@@ -149,7 +154,7 @@ export default function Profile() {
         window.location.href = "/";
       } catch (error) {
         console.error("Error logging out:", error);
-        alert("Failed to logout.");
+        setNotification({ title: 'Error', message: 'Failed to logout.' });
       }
     }
   };
@@ -167,7 +172,7 @@ export default function Profile() {
           alert("Profile deleted successfully. Redirecting to profile selection.");
           window.location.href = "/";
         } else {
-          alert("Failed to delete profile.");
+          setNotification({ title: 'Error', message: 'Failed to delete profile.' });
         }
       } catch (error) {
         console.error("Error deleting current profile:", error);
@@ -177,15 +182,18 @@ export default function Profile() {
   };
 
   const handleClearData = () => {
-    if (confirm("Are you sure you want to clear ALL data? This will reset your XP, level, requests, and tasks. This cannot be undone.")) {
-      try {
-        localStorage.clear();
-        alert("All data has been cleared. The app will now reload.");
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Error clearing data:", error);
-        alert("Failed to clear data.");
-      }
+    setClearDataConfirm(true);
+  };
+
+  const confirmClearData = () => {
+    setClearDataConfirm(false);
+    try {
+      localStorage.clear();
+      setNotification({ title: 'Data Cleared', message: 'All data has been cleared. The app will now reload.' });
+      setTimeout(() => window.location.href = '/', 2000);
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      setNotification({ title: 'Error', message: 'Failed to clear data.' });
     }
   };
 
@@ -242,16 +250,11 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Achievements Placeholder */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Achievements</h3>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <div className="text-4xl mb-2">🏆</div>
-            <p>Complete more tasks to unlock achievements!</p>
-          </div>
-        </div>
-      </div>
+      {/* Achievements */}
+      <AchievementGrid
+        achievements={getAchievements()}
+        unlockedIds={getUnlockedAchievements().map(a => a.id)}
+      />
 
       {/* Profile Management */}
       <div className="mt-6">
@@ -353,6 +356,24 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      {clearDataConfirm && (
+        <ConfirmationModal
+          title="Clear All Data"
+          message="Are you sure you want to clear ALL data? This will reset your XP, level, requests, and tasks. This cannot be undone."
+          confirmText="Clear Data"
+          onConfirm={confirmClearData}
+          onCancel={() => setClearDataConfirm(false)}
+        />
+      )}
+
+      {notification && (
+        <NotificationModal
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }

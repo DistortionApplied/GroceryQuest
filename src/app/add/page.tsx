@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { createRequest, createTask } from "@/lib/clientData";
+import { NotificationModal } from "@/components/NotificationModal";
+import { createRequest, createTask, getCurrentUser, calculateUserStats, checkAchievementUnlock, unlockAchievement, awardAchievementXP, updateUser } from "@/lib/clientData";
 
 export default function AddRequest() {
   const [itemName, setItemName] = useState("");
   const [description, setDescription] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
 
 
 
@@ -36,15 +38,27 @@ export default function AddRequest() {
         isCompleted: 0,
       });
 
+      // Check for first list achievement
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        const stats = calculateUserStats(currentUser);
+        const unlockedAchievements = checkAchievementUnlock(currentUser, stats);
+        if (unlockedAchievements.length > 0) {
+          unlockedAchievements.forEach(a => unlockAchievement(a.id));
+          const userWithAchievementXP = awardAchievementXP(currentUser, unlockedAchievements);
+          updateUser(userWithAchievementXP);
+        }
+      }
+
       // Reset form
       setItemName("");
       setDescription("");
-      alert("Grocery list created! Now add items to your list.");
-      // Navigate back to requests
-      window.location.href = "/requests";
+      setNotification({ title: 'List Created', message: 'Grocery list created! Now add items to your list.' });
+      // Navigate after a short delay
+      setTimeout(() => window.location.href = '/requests', 2000);
     } catch (error) {
       console.error("Error creating list:", error);
-      alert("Failed to create list");
+      setNotification({ title: 'Error', message: 'Failed to create list' });
     }
   };
 
@@ -100,6 +114,14 @@ export default function AddRequest() {
           </Button>
         </div>
       </div>
+
+      {notification && (
+        <NotificationModal
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }

@@ -42,7 +42,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
           <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
-            🎯
+            🛒
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Grocery Quest
@@ -121,7 +121,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
           <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
-            🎯
+            🛒
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Grocery Quest
@@ -173,7 +173,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
       {/* App Logo/Icon */}
       <div className="text-center mb-8">
         <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
-          🎯
+          🛒
         </div>
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
           TaskQuest

@@ -40,6 +40,32 @@ export interface Reward {
   unlockedAt: string;
 }
 
+export interface AchievementRequirement {
+  type: 'xp_total' | 'level_reached' | 'lists_completed' | 'lists_created' | 'tasks_completed' | 'streak_days';
+  value: number;
+  comparison: 'gte' | 'eq' | 'lte';
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'progression' | 'completion' | 'special';
+  xpReward: number;
+  requirements: AchievementRequirement[];
+  unlockedAt?: string;
+}
+
+export interface UserStats {
+  xp_total: number;
+  level_reached: number;
+  lists_completed: number;
+  lists_created: number;
+  tasks_completed: number;
+  streak_days: number;
+}
+
 // Storage keys
 const STORAGE_KEYS = {
   users: 'gamified_app_users',
@@ -48,6 +74,7 @@ const STORAGE_KEYS = {
   tasks: 'gamified_app_tasks',
   rewards: 'gamified_app_rewards',
   rewardCategories: 'gamified_app_reward_categories',
+  unlockedAchievements: 'gamified_app_unlocked_achievements',
 };
 
 // Reward category types
@@ -104,8 +131,94 @@ const DEFAULT_REWARD_CATEGORIES: RewardCategory[] = [
     name: 'Groceries',
     icon: '🛒',
     items: [
-      { id: 'grocery_item', name: 'Grocery Item', icon: '🛒' }
+      { id: 'grocery_item', name: 'Grocery Item', icon: '🛒' },
+      { id: 'grocery_list', name: 'Grocery List', icon: '🛒' }
     ]
+  }
+];
+
+// Predefined achievements
+const ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first_steps',
+    name: 'First Steps',
+    description: 'Create your first grocery list',
+    icon: '🎯',
+    category: 'progression',
+    xpReward: 40,
+    requirements: [{ type: 'lists_created', value: 1, comparison: 'gte' }]
+  },
+  {
+    id: 'tasker',
+    name: 'Tasker',
+    description: 'Complete your first task',
+    icon: '✅',
+    category: 'progression',
+    xpReward: 20,
+    requirements: [{ type: 'tasks_completed', value: 1, comparison: 'gte' }]
+  },
+  {
+    id: 'shopping_beginner',
+    name: 'Shopping Beginner',
+    description: 'Complete 10 tasks',
+    icon: '🛒',
+    category: 'progression',
+    xpReward: 30,
+    requirements: [{ type: 'tasks_completed', value: 10, comparison: 'gte' }]
+  },
+  {
+    id: 'completer',
+    name: 'Completer',
+    description: 'Complete your first full list',
+    icon: '📋',
+    category: 'completion',
+    xpReward: 40,
+    requirements: [{ type: 'lists_completed', value: 1, comparison: 'gte' }]
+  },
+  {
+    id: 'dedicated_shopper',
+    name: 'Dedicated Shopper',
+    description: 'Complete 50 tasks',
+    icon: '💪',
+    category: 'progression',
+    xpReward: 75,
+    requirements: [{ type: 'tasks_completed', value: 50, comparison: 'gte' }]
+  },
+  {
+    id: 'streak_master',
+    name: 'Streak Master',
+    description: 'Maintain a 7-day completion streak',
+    icon: '🔥',
+    category: 'completion',
+    xpReward: 150,
+    requirements: [{ type: 'streak_days', value: 7, comparison: 'gte' }]
+  },
+  {
+    id: 'grocery_guru',
+    name: 'Grocery Guru',
+    description: 'Complete 100 tasks',
+    icon: '👑',
+    category: 'progression',
+    xpReward: 200,
+    requirements: [{ type: 'tasks_completed', value: 100, comparison: 'gte' }]
+  },
+  {
+    id: 'apprentice',
+    name: 'Apprentice',
+    description: 'Reach level 5',
+    icon: '⭐',
+    category: 'progression',
+    xpReward: 100,
+    requirements: [{ type: 'level_reached', value: 5, comparison: 'gte' }]
+  },
+  {
+    id: 'legend',
+    name: 'Legend',
+    description: 'Accumulate 1000 total XP',
+    icon: '🌟',
+    category: 'special',
+    xpReward: 300,
+    requirements: [{ type: 'xp_total', value: 1000, comparison: 'gte' }]
   }
 ];
 
@@ -519,6 +632,117 @@ export function findRewardItem(id: string): RewardItem | null {
   }
 
   return searchCategories(categories);
+}
+
+// Helper function for achievement requirement comparisons
+function compareValues(current: number, required: number, comparison: 'gte' | 'eq' | 'lte'): boolean {
+  switch (comparison) {
+    case 'gte': return current >= required;
+    case 'eq': return current === required;
+    case 'lte': return current <= required;
+    default: return false;
+  }
+}
+
+// Achievements
+export function getAchievements(): Achievement[] {
+  return ACHIEVEMENTS;
+}
+
+export function getUnlockedAchievements(): Achievement[] {
+  return getFromStorage<Achievement>(STORAGE_KEYS.unlockedAchievements);
+}
+
+export function unlockAchievement(achievementId: string): boolean {
+  const achievements = getAchievements();
+  const achievement = achievements.find(a => a.id === achievementId);
+  if (!achievement) return false;
+
+  const unlocked = getUnlockedAchievements();
+  if (unlocked.some(a => a.id === achievementId)) return false;
+
+  const unlockedAchievement = { ...achievement, unlockedAt: new Date().toISOString() };
+  unlocked.push(unlockedAchievement);
+  saveToStorage(STORAGE_KEYS.unlockedAchievements, unlocked);
+  return true;
+}
+
+export function calculateUserStats(user: User): UserStats {
+  const tasks = getTasksForCurrentUser();
+  const requests = getRequestsForCurrentUser();
+  const tasksCompleted = tasks.filter(t => t.isCompleted === 1).length;
+  const listsCompleted = requests.filter(r => r.isCompleted === 1).length;
+  const listsCreated = requests.length;
+
+  // Calculate streak: longest consecutive days with at least one completed task
+  const completedTasks = tasks
+    .filter(t => t.isCompleted === 1 && t.completedAt)
+    .sort((a, b) => new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime());
+
+  let maxStreak = 0;
+  let currentStreak = 0;
+  let lastDate: string | null = null;
+
+  for (const task of completedTasks) {
+    const taskDate = new Date(task.completedAt!).toDateString();
+    if (!lastDate || lastDate !== taskDate) {
+      if (lastDate) {
+        const prevDay = new Date(lastDate);
+        const currDay = new Date(taskDate);
+        const diffTime = currDay.getTime() - prevDay.getTime();
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        if (diffDays === 1) {
+          currentStreak++;
+        } else {
+          maxStreak = Math.max(maxStreak, currentStreak);
+          currentStreak = 1;
+        }
+      } else {
+        currentStreak = 1;
+      }
+      lastDate = taskDate;
+    }
+  }
+  maxStreak = Math.max(maxStreak, currentStreak);
+
+  return {
+    xp_total: user.xp,
+    level_reached: user.level,
+    lists_completed: listsCompleted,
+    lists_created: listsCreated,
+    tasks_completed: tasksCompleted,
+    streak_days: maxStreak
+  };
+}
+
+export function checkAchievementUnlock(user: User, stats: UserStats): Achievement[] {
+  const unlocked: Achievement[] = [];
+  const achievements = getAchievements();
+  const alreadyUnlocked = getUnlockedAchievements();
+
+  for (const achievement of achievements) {
+    if (alreadyUnlocked.some(a => a.id === achievement.id)) continue;
+
+    const meetsRequirements = achievement.requirements.every(req =>
+      compareValues(stats[req.type], req.value, req.comparison)
+    );
+
+    if (meetsRequirements) {
+      unlocked.push(achievement);
+    }
+  }
+
+  return unlocked;
+}
+
+export function awardAchievementXP(user: User, achievements: Achievement[]): User {
+  const totalXp = achievements.reduce((sum, a) => sum + a.xpReward, 0);
+  const newXp = user.xp + totalXp;
+  return {
+    ...user,
+    xp: newXp,
+    level: calculateLevelFromXp(newXp)
+  };
 }
 
 // Helper function to format timestamp to Eastern Time dd/mm/yyyy h:mm a

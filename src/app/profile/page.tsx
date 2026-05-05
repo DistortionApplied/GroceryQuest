@@ -234,11 +234,11 @@ export default function Profile() {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalRequests}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Total Requests</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Total Lists</div>
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completedRequests}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+         <div className="text-sm text-gray-600 dark:text-gray-400">Completed Lists</div>
         </div>
       </div>
 

@@ -14,7 +14,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/requests", label: "Requests", icon: "📋" },
+    { href: "/requests", label: "Lists", icon: "📋" },
     { href: "/add", label: "Add", icon: "➕" },
     { href: "/profile", label: "Profile", icon: "👤" },
   ];

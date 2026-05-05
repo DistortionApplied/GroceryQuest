@@ -85,45 +85,59 @@ export default function RequestDetail() {
     updateTaskAndCheckCompletion(taskId, newIsCompleted);
   };
 
-  const updateTaskAndCheckCompletion = (taskId: number, newIsCompleted: number) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
+   const updateTaskAndCheckCompletion = (taskId: number, newIsCompleted: number) => {
+     const task = tasks.find(t => t.id === taskId);
+     if (!task) return;
 
-    // Update task
-    const updatedTask = {
-      ...task,
-      isCompleted: newIsCompleted,
-      completedAt: newIsCompleted === 1 ? new Date().toISOString() : task.completedAt,
-    };
-    updateTask(updatedTask as any);
+     // Update task
+     const updatedTask = {
+       ...task,
+       isCompleted: newIsCompleted,
+       completedAt: newIsCompleted === 1 ? new Date().toISOString() : task.completedAt,
+     };
+     updateTask(updatedTask as any);
 
+     // Award XP to user if task is being completed
+     if (newIsCompleted === 1 && task.isCompleted === 0) {
+       const currentUser = getUserById(parseInt(localStorage.getItem('gamified_app_current_user_id') || '0'));
+       if (currentUser) {
+         const xpToAdd = task.xpValue || 10;
+         const newXp = currentUser.xp + xpToAdd;
+         const newLevel = calculateLevelFromXp(newXp);
+         const updatedUser = {
+           ...currentUser,
+           xp: newXp,
+           level: newLevel,
+         };
+         updateUser(updatedUser);
+       }
+     }
 
+     // Update request completion count
+     const updatedAllTasks = getTasksByRequestId(parseInt(requestId!));
+     const completedCount = updatedAllTasks.filter(t => t.isCompleted === 1).length;
+     const isNowCompleted = completedCount === updatedAllTasks.length;
 
-    // Update request completion count
-    const updatedAllTasks = getTasksByRequestId(parseInt(requestId!));
-    const completedCount = updatedAllTasks.filter(t => t.isCompleted === 1).length;
-    const isNowCompleted = completedCount === updatedAllTasks.length;
+     if (request) {
+       const updatedRequest = {
+         ...request,
+         completedTasksCount: completedCount,
+         isCompleted: isNowCompleted ? 1 : 0,
+         completedAt: isNowCompleted ? (request.isCompleted === false ? new Date().toISOString() : request.completedAt) : undefined,
+       };
+       updateRequest(updatedRequest as any);
+     }
 
-    if (request) {
-      const updatedRequest = {
-        ...request,
-        completedTasksCount: completedCount,
-        isCompleted: isNowCompleted ? 1 : 0,
-        completedAt: isNowCompleted ? (request.isCompleted === false ? new Date().toISOString() : request.completedAt) : undefined,
-      };
-      updateRequest(updatedRequest as any);
-    }
-
-    // Refresh local state
-    setTasks(prevTasks => prevTasks.map(t =>
-      t.id === taskId ? { ...t, isCompleted: newIsCompleted } : t
-    ));
-    setRequest(prevRequest => prevRequest ? {
-      ...prevRequest,
-      completedTasksCount: completedCount,
-      isCompleted: isNowCompleted,
-    } : null);
-  };
+     // Refresh local state
+     setTasks(prevTasks => prevTasks.map(t =>
+       t.id === taskId ? { ...t, isCompleted: newIsCompleted } : t
+     ));
+     setRequest(prevRequest => prevRequest ? {
+       ...prevRequest,
+       completedTasksCount: completedCount,
+       isCompleted: isNowCompleted,
+     } : null);
+   };
 
   const handleDragStart = (e: React.DragEvent, taskId: number) => {
     setDraggedTaskId(taskId);
@@ -172,17 +186,17 @@ export default function RequestDetail() {
     }
   };
 
-  const addNewItem = () => {
-    if (!newItemName.trim() || !request) return;
+   const addNewItem = () => {
+     if (!newItemName.trim() || !request) return;
 
-    try {
-      const newTask = createTask({
-        requestId: parseInt(requestId!),
-        title: newItemName.trim(),
-        description: undefined,
-        xpValue: 0,
-        isCompleted: 0,
-      });
+     try {
+       const newTask = createTask({
+         requestId: parseInt(requestId!),
+         title: newItemName.trim(),
+         description: undefined,
+         xpValue: 10,
+         isCompleted: 0,
+       });
 
       // Update local state
       setTasks(prevTasks => [...prevTasks, newTask]);
@@ -301,7 +315,7 @@ export default function RequestDetail() {
         {tasks.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <div className="text-4xl mb-2">🛒</div>
-            <p>No items in this list yet. Click "Add Item" to get started!</p>
+            <p>No items in this list yet. Click &quot;Add Item&quot; to get started!</p>
           </div>
         ) : (
           tasks.map((task, index) => (

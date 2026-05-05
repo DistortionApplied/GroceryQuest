@@ -14,6 +14,8 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
+- [x] Updated UI terminology from "Requests" to "Lists" for consistency (nav label, profile stats)
+- [x] Fixed PostCSS XSS vulnerabilities by adding resolutions to package.json
 
 ## Current Structure
 
@@ -85,3 +87,5 @@ export async function GET() {
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
+| 2026-05-05 | Updated UI labels from "Requests" to "Lists" in mobile navigation and profile statistics for consistency |
+| 2026-05-05 | Added package.json resolutions to force update PostCSS and resolve XSS vulnerabilities |

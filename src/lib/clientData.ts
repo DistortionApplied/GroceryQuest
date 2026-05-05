@@ -6,6 +6,7 @@ export interface User {
   xp: number;
   level: number;
   createdAt: string;
+  profilePicture?: string; // base64 encoded image
 }
 
 export interface Request {

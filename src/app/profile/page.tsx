@@ -6,13 +6,16 @@ import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { AchievementGrid } from "@/components/AchievementGrid";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { NotificationModal } from "@/components/NotificationModal";
-import { getCurrentUser, getRequestsForCurrentUser, getUsers, switchToUser, deleteUser, deleteCurrentProfile, getXpForNextLevel, getLevelTitle, setCurrentUserId, getAchievements, getUnlockedAchievements } from "@/lib/clientData";
+import { compressImage, isValidImageFile } from "@/lib/imageUtils";
+import { getCurrentUser, getRequestsForCurrentUser, getUsers, switchToUser, deleteUser, deleteCurrentProfile, updateUser, getXpForNextLevel, getLevelTitle, setCurrentUserId, getAchievements, getUnlockedAchievements } from "@/lib/clientData";
 
 interface User {
   id: number;
   name: string;
   xp: number;
   level: number;
+  createdAt: string;
+  profilePicture?: string;
 }
 
 interface Request {
@@ -28,6 +31,7 @@ export default function Profile() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [clearDataConfirm, setClearDataConfirm] = useState(false);
   const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
+  const [uploadingPicture, setUploadingPicture] = useState(false);
 
   const loadProfileData = () => {
     try {
@@ -197,6 +201,47 @@ export default function Profile() {
     }
   };
 
+  const handlePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!isValidImageFile(file)) {
+      setNotification({ title: 'Invalid File', message: 'Please select a valid image file (JPEG, PNG, WebP, GIF) under 5MB.' });
+      return;
+    }
+
+    setUploadingPicture(true);
+    try {
+      const compressedImage = await compressImage(file);
+      const updatedUser = { ...user, profilePicture: compressedImage };
+      updateUser(updatedUser);
+      setUser(updatedUser);
+      setNotification({ title: 'Picture Updated', message: 'Your profile picture has been updated successfully.' });
+    } catch (error) {
+      console.error('Error uploading picture:', error);
+      setNotification({ title: 'Upload Failed', message: 'Failed to upload profile picture. Please try again.' });
+    } finally {
+      setUploadingPicture(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  const handleRemovePicture = () => {
+    if (!user) return;
+
+    try {
+      const updatedUser = { ...user };
+      delete updatedUser.profilePicture;
+      updateUser(updatedUser);
+      setUser(updatedUser);
+      setNotification({ title: 'Picture Removed', message: 'Your profile picture has been removed.' });
+    } catch (error) {
+      console.error('Error removing picture:', error);
+      setNotification({ title: 'Error', message: 'Failed to remove profile picture.' });
+    }
+  };
+
   const totalRequests = requests.length;
   const completedRequests = requests.filter(r => r.isCompleted).length;
   const xpForNextLevel = getXpForNextLevel(user.level);
@@ -223,11 +268,43 @@ export default function Profile() {
       {/* User Info */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
+          {user.profilePicture ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.profilePicture}
+              alt={`${user.name}'s profile`}
+              className="w-16 h-16 rounded-full object-cover mx-auto mb-3 border-4 border-white dark:border-gray-700 shadow-lg"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+          )}
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{user.name}</h2>
           <p className="text-gray-600 dark:text-gray-400">Level {user.level} {getLevelTitle(user.level)}</p>
+
+          {/* Profile Picture Controls */}
+          <div className="mt-4 flex justify-center gap-2">
+            <label className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePictureUpload}
+                className="hidden"
+                disabled={uploadingPicture}
+              />
+              {uploadingPicture ? 'Uploading...' : 'Upload Picture'}
+            </label>
+            {user.profilePicture && (
+              <button
+                onClick={handleRemovePicture}
+                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors"
+                disabled={uploadingPicture}
+              >
+                Remove Picture
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

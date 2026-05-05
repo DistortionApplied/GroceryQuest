@@ -42,7 +42,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
           <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
-            🛒
+            🎯
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Grocery Quest
@@ -121,7 +121,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
           <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
-            🛒
+            🎯
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Grocery Quest
@@ -170,14 +170,14 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
 
   return (
     <div className="max-w-md w-full space-y-8">
-      {/* App Logo/Icon */}
-      <div className="text-center mb-8">
-        <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
-          🛒
-        </div>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          TaskQuest
-        </h1>
+        {/* App Logo/Icon */}
+        <div className="text-center mb-8">
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
+            🛒
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Grocery Quest
+          </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300">
           Gamified Task Management
         </p>
@@ -230,9 +230,18 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
               className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                {user.profilePicture ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.profilePicture}
+                    alt={`${user.name}'s profile`}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-white">
                     {user.name}

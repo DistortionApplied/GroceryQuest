@@ -39,6 +39,7 @@ export default function RequestDetail() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newAchievements, setNewAchievements] = useState<{ achievements: Achievement[], levelUp: boolean } | null>(null);
+  const [copyingList, setCopyingList] = useState(false);
 
   useEffect(() => {
     if (!requestId) return;
@@ -254,6 +255,40 @@ export default function RequestDetail() {
     return rewardItem ? rewardItem.icon : "🛒";
   };
 
+  const copyListToClipboard = async () => {
+    if (!request) return;
+
+    setCopyingList(true);
+    try {
+      const listText = formatListForSharing(request, tasks);
+      await navigator.clipboard.writeText(listText);
+      // Show temporary feedback (could add a toast here, but for now just reset)
+      setTimeout(() => setCopyingList(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy list:', error);
+      setCopyingList(false);
+    }
+  };
+
+  const formatListForSharing = (request: Request, tasks: Task[]): string => {
+    let text = `${request.itemName}\n`;
+    if (request.description) {
+      text += `${request.description}\n`;
+    }
+    text += '\n';
+
+    if (tasks.length === 0) {
+      text += 'No items in this list yet.';
+    } else {
+      tasks.forEach(task => {
+        const checkmark = task.isCompleted ? '✓' : '○';
+        text += `${checkmark} ${task.title}\n`;
+      });
+    }
+
+    return text;
+  };
+
   if (loading) {
     return (
       <div className="p-4">
@@ -317,11 +352,16 @@ export default function RequestDetail() {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Shopping Items</h2>
-          {!request?.isCompleted && (
-            <Button onClick={() => setShowAddItem(!showAddItem)} size="sm" variant="outline">
-              + Add Item
+          <div className="flex gap-2">
+            <Button onClick={copyListToClipboard} size="sm" variant="outline" disabled={copyingList}>
+              {copyingList ? 'Copied!' : '📋 Copy List'}
             </Button>
-          )}
+            {!request?.isCompleted && (
+              <Button onClick={() => setShowAddItem(!showAddItem)} size="sm" variant="outline">
+                + Add Item
+              </Button>
+            )}
+          </div>
         </div>
 
         {showAddItem && !request?.isCompleted && (

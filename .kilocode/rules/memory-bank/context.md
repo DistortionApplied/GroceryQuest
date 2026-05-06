@@ -17,6 +17,11 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Updated UI terminology from "Requests" to "Lists" for consistency (nav label, profile stats)
 - [x] Fixed PostCSS XSS vulnerabilities by adding resolutions to package.json
 - [x] Implemented achievements system with XP rewards, unlock notifications, and collapsible mobile-friendly UI
+- [x] Fixed "First Steps" achievement to trigger on list creation instead of completion
+- [x] Changed grocery list icons to shopping cart (🛒) for thematic consistency
+- [x] Replaced all browser alert/confirm dialogs with custom styled modals for consistent UI
+- [x] Updated app icon from target (🎯) to shopping cart (🛒) and ensured app name consistency
+- [x] Added user-uploaded profile pictures with image compression, validation, and localStorage storage
 
 ## Current Structure
 
@@ -90,4 +95,6 @@ export async function GET() {
 | Initial | Template created with base setup |
 | 2026-05-05 | Updated UI labels from "Requests" to "Lists" in mobile navigation and profile statistics for consistency |
 | 2026-05-05 | Added package.json resolutions to force update PostCSS and resolve XSS vulnerabilities |
-| 2026-05-05 | Implemented achievements system: added Achievement types and storage, AchievementNotification and AchievementGrid components, integrated checking logic after task/list actions, updated profile page with collapsible achievements section
+| 2026-05-05 | Implemented achievements system: added Achievement types and storage, AchievementNotification and AchievementGrid components, integrated checking logic after task/list actions, updated profile page with collapsible achievements section |
+| 2026-05-05 | Fixed First Steps achievement requirement, changed icons to shopping cart, replaced browser dialogs with custom modals, added profile picture upload with compression |
+| 2026-05-05 | Updated memory bank context with all recent feature implementations

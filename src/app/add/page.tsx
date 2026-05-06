@@ -71,7 +71,7 @@ export default function AddRequest() {
 
       <div className="space-y-6">
         {/* Item Details */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 p-4  shadow-sm border border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">List Details</h2>
 
           <div className="space-y-4">
@@ -102,7 +102,7 @@ export default function AddRequest() {
 
         {/* Error Message */}
         {errorMessage && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3 mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700  p-3 mb-4">
             <p className="text-red-600 dark:text-red-400 text-sm">{errorMessage}</p>
           </div>
         )}

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { XPBar } from "@/components/XPBar";
 import { RequestCard } from "@/components/RequestCard";
 import { Button } from "@/components/ui/Button";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { NotificationModal } from "@/components/NotificationModal";
 import {
   getCurrentUser,
   getRequestsForCurrentUser,
@@ -21,6 +23,8 @@ export default function Requests() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
+  const [deleteConfirmRequestId, setDeleteConfirmRequestId] = useState<number | null>(null);
+  const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     try {
@@ -58,20 +62,26 @@ export default function Requests() {
   }, []);
 
   const handleDeleteRequest = (requestId: number) => {
-    if (confirm("Are you sure you want to delete this request? All associated tasks will be deleted.")) {
-      try {
-        deleteRequest(requestId);
-        const updatedRequests = getRequestsForCurrentUser();
-        setRequests(updatedRequests);
-        // Dispatch event to notify other components
-        window.dispatchEvent(new CustomEvent('dataUpdated', {
-          detail: { type: 'request' }
-        }));
-      } catch (error) {
-        console.error('Error deleting request:', error);
-        alert('Failed to delete request');
-      }
+    setDeleteConfirmRequestId(requestId);
+  };
+
+  const confirmDeleteRequest = () => {
+    if (deleteConfirmRequestId === null) return;
+
+    try {
+      deleteRequest(deleteConfirmRequestId);
+      const updatedRequests = getRequestsForCurrentUser();
+      setRequests(updatedRequests);
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('dataUpdated', {
+        detail: { type: 'request' }
+      }));
+      setNotification({ title: 'Request Deleted', message: 'Request deleted successfully.' });
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      setNotification({ title: 'Error', message: 'Failed to delete request.' });
     }
+    setDeleteConfirmRequestId(null);
   };
 
   const activeRequests = requests.filter(r => !r.isCompleted);
@@ -81,7 +91,7 @@ export default function Requests() {
     return (
       <div className="p-4">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+          <div className="animate-spin  h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading requests...</p>
         </div>
       </div>
@@ -188,6 +198,25 @@ export default function Requests() {
         >
           + Create New List
         </Button>
+      )}
+
+      {deleteConfirmRequestId !== null && (
+        <ConfirmationModal
+          title="Delete Request"
+          message="Are you sure you want to delete this request? All associated tasks will be deleted."
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDeleteRequest}
+          onCancel={() => setDeleteConfirmRequestId(null)}
+        />
+      )}
+
+      {notification && (
+        <NotificationModal
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
       )}
     </div>
   );

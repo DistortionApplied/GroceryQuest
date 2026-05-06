@@ -12,14 +12,14 @@ export function XPBar({ currentXP, level, xpForNextLevel }: XPBarProps) {
   const progressPercentage = Math.min((xpInLevel / xpForNextLevel) * 100, 100);
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
+    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Level {level}</span>
-        <span className="text-sm text-gray-500 dark:text-gray-500">{xpInLevel}/{xpForNextLevel} XP</span>
-      </div>
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-        <div
-          className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500"
+         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Level {level}</span>
+         <span className="text-sm text-gray-500 dark:text-gray-500">{xpInLevel}/{xpForNextLevel} XP</span>
+       </div>
+       <div className="w-full bg-gray-200 dark:bg-gray-700 h-3">
+         <div
+           className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 transition-all duration-500"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>

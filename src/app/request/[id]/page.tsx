@@ -6,7 +6,9 @@ import { TaskItem } from "@/components/TaskItem";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AchievementNotification } from "@/components/AchievementNotification";
-import { getRequestById, getTasksByRequestId, updateTask, updateRequest, createTask, getUserById, updateUser, findRewardItem, calculateLevelFromXp, formatTimestampToEST, reorderTasksForRequest, checkAchievementUnlock, awardAchievementXP, calculateUserStats, unlockAchievement, Achievement } from "@/lib/clientData";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { NotificationModal } from "@/components/NotificationModal";
+import { getRequestById, getTasksByRequestId, updateTask, updateRequest, createTask, createRequest, deleteTask, getUserById, updateUser, findRewardItem, calculateLevelFromXp, formatTimestampToEST, reorderTasksForRequest, checkAchievementUnlock, awardAchievementXP, calculateUserStats, unlockAchievement, Achievement } from "@/lib/clientData";
 
 interface Task {
   id: number;
@@ -38,8 +40,14 @@ export default function RequestDetail() {
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
+  const [newItemDescription, setNewItemDescription] = useState("");
   const [newAchievements, setNewAchievements] = useState<{ achievements: Achievement[], levelUp: boolean } | null>(null);
   const [copyingList, setCopyingList] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [editingTaskTitle, setEditingTaskTitle] = useState("");
+  const [editingTaskDescription, setEditingTaskDescription] = useState("");
+  const [deleteConfirmTaskId, setDeleteConfirmTaskId] = useState<number | null>(null);
+  const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     if (!requestId) return;
@@ -220,16 +228,16 @@ export default function RequestDetail() {
   };
 
    const addNewItem = () => {
-     if (!newItemName.trim() || !request) return;
+      if (!newItemName.trim() || !request) return;
 
-     try {
-       const newTask = createTask({
-         requestId: parseInt(requestId!),
-         title: newItemName.trim(),
-         description: undefined,
-         xpValue: 10,
-         isCompleted: 0,
-       });
+      try {
+        const newTask = createTask({
+          requestId: parseInt(requestId!),
+          title: newItemName.trim(),
+          description: newItemDescription.trim() || undefined,
+          xpValue: 10,
+          isCompleted: 0,
+        });
 
       // Update local state
       setTasks(prevTasks => [...prevTasks, newTask]);
@@ -244,13 +252,159 @@ export default function RequestDetail() {
 
       // Reset form
       setNewItemName("");
+      setNewItemDescription("");
       setShowAddItem(false);
-    } catch (error) {
-      console.error("Error adding item:", error);
-    }
-  };
+     } catch (error) {
+       console.error("Error adding item:", error);
+     }
+   };
 
-  const getItemIcon = (type: string) => {
+   const handleEditTask = (taskId: number) => {
+     const task = tasks.find(t => t.id === taskId);
+     if (task) {
+       setEditingTaskId(taskId);
+       setEditingTaskTitle(task.title);
+       setEditingTaskDescription(task.description || "");
+     }
+   };
+
+   const handleSaveEdit = () => {
+     if (!editingTaskId || !editingTaskTitle.trim()) return;
+
+     const taskToUpdate = tasks.find(t => t.id === editingTaskId);
+     if (taskToUpdate) {
+       const updatedTask = {
+         ...taskToUpdate,
+         title: editingTaskTitle.trim(),
+         description: editingTaskDescription.trim() || undefined,
+       };
+       updateTask(updatedTask as any);
+       setTasks(prevTasks => prevTasks.map(t => t.id === editingTaskId ? updatedTask : t));
+     }
+
+     setEditingTaskId(null);
+     setEditingTaskTitle("");
+     setEditingTaskDescription("");
+   };
+
+   const handleCancelEdit = () => {
+     setEditingTaskId(null);
+     setEditingTaskTitle("");
+     setEditingTaskDescription("");
+   };
+
+   const handleDeleteTaskRequested = (taskId: number) => {
+     setDeleteConfirmTaskId(taskId);
+   };
+
+   const handleConfirmDelete = () => {
+     if (deleteConfirmTaskId === null) return;
+     
+     const task = tasks.find(t => t.id === deleteConfirmTaskId);
+     if (!task) return;
+     
+     deleteTask(deleteConfirmTaskId);
+     setTasks(prevTasks => prevTasks.filter(t => t.id !== deleteConfirmTaskId));
+
+     // Update request counts
+     const remainingTasks = tasks.filter(t => t.id !== deleteConfirmTaskId);
+     if (request) {
+       const updatedRequest = {
+         ...request,
+         requiredTasksCount: remainingTasks.length,
+         completedTasksCount: remainingTasks.filter(t => t.isCompleted === 1).length,
+       };
+       updateRequest(updatedRequest as any);
+       setRequest(updatedRequest);
+     }
+
+     setDeleteConfirmTaskId(null);
+   };
+
+   const handleCancelDelete = () => {
+     setDeleteConfirmTaskId(null);
+   };
+
+   const handleDeleteTask = (taskId: number) => {
+     deleteTask(taskId);
+     setTasks(prevTasks => prevTasks.filter(t => t.id !== taskId));
+
+     // Update request counts
+     const remainingTasks = tasks.filter(t => t.id !== taskId);
+     if (request) {
+       const updatedRequest = {
+         ...request,
+         requiredTasksCount: remainingTasks.length,
+         completedTasksCount: remainingTasks.filter(t => t.isCompleted === 1).length,
+       };
+       updateRequest(updatedRequest as any);
+       setRequest(updatedRequest);
+     }
+   };
+
+   const moveMissingItemsToNewList = () => {
+     if (!request) return;
+
+     const uncheckedTasks = tasks.filter(task => task.isCompleted === 0);
+     if (uncheckedTasks.length === 0) return;
+
+     try {
+       // Create new list with missing items
+       const newRequest = createRequest({
+         userId: 1,
+         itemName: `${request.itemName} (Missing Items)`,
+         itemType: request.itemType,
+         description: `Items not found during shopping on ${new Date().toLocaleDateString()}`,
+         requiredTasksCount: uncheckedTasks.length,
+         completedTasksCount: 0,
+         isCompleted: 0,
+       });
+
+       // Add the missing items as tasks to the new list
+       uncheckedTasks.forEach(task => {
+         createTask({
+           requestId: newRequest.id,
+           title: task.title,
+           description: task.description,
+           xpValue: task.xpValue,
+           isCompleted: 0,
+         });
+       });
+
+       // Remove unchecked tasks from current list
+       const remainingTasks = tasks.filter(task => task.isCompleted === 1);
+       uncheckedTasks.forEach(task => deleteTask(task.id));
+
+       const isNowCompleted = remainingTasks.length > 0;
+       const updatedRequest: Request = {
+         ...request,
+         requiredTasksCount: remainingTasks.length,
+         completedTasksCount: remainingTasks.length,
+         isCompleted: isNowCompleted,
+         completedAt: isNowCompleted ? new Date().toISOString() : undefined,
+       };
+       updateRequest({
+         ...updatedRequest,
+         isCompleted: isNowCompleted ? 1 : 0,
+       } as any);
+
+        setTasks(remainingTasks);
+        setRequest(updatedRequest);
+
+        setNotification({
+          title: 'Missing Items Moved',
+          message: `Items moved to new list: "${newRequest.itemName}"`
+        });
+      } catch (error) {
+        console.error('Error moving missing items:', error);
+        setNotification({
+          title: 'Error',
+          message: 'Failed to move missing items. Please try again.'
+        });
+      }
+   };
+
+   const getItemIcon = (type: string) => {
     const rewardItem = findRewardItem(type);
     return rewardItem ? rewardItem.icon : "🛒";
   };
@@ -293,7 +447,7 @@ export default function RequestDetail() {
     return (
       <div className="p-4">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+          <div className="animate-spin  h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
         </div>
       </div>
     );
@@ -337,7 +491,7 @@ export default function RequestDetail() {
         <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
           <span>Items: {completedTasks}/{totalTasks}</span>
           {request.isCompleted && (
-            <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs">
+            <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200  text-xs">
               Shopping Complete
             </span>
           )}
@@ -365,18 +519,29 @@ export default function RequestDetail() {
         </div>
 
         {showAddItem && !request?.isCompleted && (
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="space-y-3">
-              <Input
-                placeholder="Enter item name..."
-                value={newItemName}
-                onChange={setNewItemName}
-              />
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Item Name</label>
+                <Input
+                  placeholder="Enter item name..."
+                  value={newItemName}
+                  onChange={setNewItemName}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
+                <Input
+                  placeholder="Description"
+                  value={newItemDescription}
+                  onChange={setNewItemDescription}
+                />
+              </div>
               <div className="flex gap-2">
                 <Button onClick={addNewItem} size="sm" className={!newItemName.trim() ? "opacity-50 cursor-not-allowed" : ""}>
                   Add Item
                 </Button>
-                <Button onClick={() => { setShowAddItem(false); setNewItemName(""); }} size="sm" variant="outline">
+                <Button onClick={() => { setShowAddItem(false); setNewItemName(""); setNewItemDescription(""); }} size="sm" variant="outline">
                   Cancel
                 </Button>
               </div>
@@ -399,26 +564,72 @@ export default function RequestDetail() {
               onDrop={(e) => handleDrop(e, task.id)}
               className="cursor-move"
             >
-              <TaskItem
-                id={task.id}
-                title={task.title}
-                description={task.description}
-                xpValue={task.xpValue}
-                isCompleted={Boolean(task.isCompleted)}
-                onToggle={handleTaskToggle}
-                onMoveUp={moveTaskUp}
-                onMoveDown={moveTaskDown}
-                canMoveUp={index > 0}
-                canMoveDown={index < tasks.length - 1}
-                isHealthTask={isHealthTask(task.title)}
-              />
+              {editingTaskId === task.id ? (
+                <div className="bg-white dark:bg-gray-800 p-4 border border-blue-300 dark:border-blue-600">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                      <Input
+                        value={editingTaskTitle}
+                        onChange={setEditingTaskTitle}
+                        placeholder="Item name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
+                      <Input
+                        value={editingTaskDescription}
+                        onChange={setEditingTaskDescription}
+                        placeholder="Description"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleSaveEdit} size="sm">
+                        Save
+                      </Button>
+                      <Button onClick={handleCancelEdit} size="sm" variant="outline">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <TaskItem
+                  id={task.id}
+                  title={task.title}
+                  description={task.description}
+                  xpValue={task.xpValue}
+                  isCompleted={Boolean(task.isCompleted)}
+                  onToggle={handleTaskToggle}
+                  onMoveUp={moveTaskUp}
+                  onMoveDown={moveTaskDown}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < tasks.length - 1}
+                  isHealthTask={isHealthTask(task.title)}
+                   onEdit={handleEditTask}
+                   onDeleteRequested={handleDeleteTaskRequested}
+                />
+              )}
             </div>
           ))
+        )}
+
+        {!request.isCompleted && tasks.some(t => t.isCompleted === 0) && (
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+            <Button 
+              onClick={moveMissingItemsToNewList} 
+              size="sm" 
+              variant="outline"
+              className="w-full"
+            >
+              📦 Move Missing Items to New List
+            </Button>
+          </div>
         )}
       </div>
 
       {request.isCompleted && (
-        <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+        <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700">
           <div className="text-center">
             <div className="text-4xl mb-2">🎉</div>
             <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-1">
@@ -436,6 +647,25 @@ export default function RequestDetail() {
           achievements={newAchievements.achievements}
           onDismiss={() => setNewAchievements(null)}
           levelUp={newAchievements.levelUp}
+        />
+      )}
+
+      {deleteConfirmTaskId !== null && (
+        <ConfirmationModal
+          title="Delete Item"
+          message="Are you sure you want to delete this item?"
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
+
+      {notification && (
+        <NotificationModal
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
         />
       )}
     </div>

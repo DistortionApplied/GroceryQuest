@@ -41,7 +41,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
       <div className="max-w-md w-full space-y-8">
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600  flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
             🎯
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -53,7 +53,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
         </div>
 
         {/* Welcome Message */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 p-6  shadow-lg border border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Welcome Adventurer!
           </h2>
@@ -120,7 +120,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
       <div className="max-w-md w-full space-y-8">
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600  flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
             🎯
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -172,7 +172,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
     <div className="max-w-md w-full space-y-8">
         {/* App Logo/Icon */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600  flex items-center justify-center text-white text-4xl font-bold mx-auto mb-6 shadow-lg">
             🛒
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -184,7 +184,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
       </div>
 
       {/* Welcome Back Message */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 p-6  shadow-lg border border-gray-200 dark:border-gray-700">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Welcome Back!
         </h2>
@@ -227,7 +227,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
             <button
               key={user.id}
               onClick={() => handleSelectProfile(user.id)}
-              className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
+              className="w-full p-4 bg-white dark:bg-gray-800  border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 {user.profilePicture ? (
@@ -235,10 +235,10 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
                   <img
                     src={user.profilePicture}
                     alt={`${user.name}'s profile`}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700"
+                    className="w-10 h-10  object-cover border-2 border-white dark:border-gray-700"
                   />
                 ) : (
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600  flex items-center justify-center text-white font-bold">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 )}

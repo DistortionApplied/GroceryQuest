@@ -32,6 +32,9 @@ export default function Profile() {
   const [clearDataConfirm, setClearDataConfirm] = useState(false);
   const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
   const [uploadingPicture, setUploadingPicture] = useState(false);
+  const [deleteProfileConfirm, setDeleteProfileConfirm] = useState<{ userId: number; userName: string } | null>(null);
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const [deleteAccountConfirm, setDeleteAccountConfirm] = useState(false);
 
   const loadProfileData = () => {
     try {
@@ -100,7 +103,7 @@ export default function Profile() {
     return (
       <div className="p-4">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+          <div className="animate-spin  h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
         </div>
       </div>
     );
@@ -126,63 +129,73 @@ export default function Profile() {
       }
     } catch (error) {
       console.error("Error switching profile:", error);
-      alert("Failed to switch profile.");
+      setNotification({ title: 'Error', message: 'Failed to switch profile.' });
     }
   };
 
   const handleDeleteProfile = (userId: number, userName: string) => {
     if (allUsers.length <= 1) {
-      alert("Cannot delete the last profile.");
+      setNotification({ title: 'Cannot Delete', message: 'Cannot delete the last profile.' });
       return;
     }
 
-    if (confirm(`Are you sure you want to delete the profile "${userName}"? This will permanently delete all their data and cannot be undone.`)) {
-      try {
-        deleteUser(userId);
-        setAllUsers(getUsers()); // Refresh user list
-        loadProfileData(); // Reload current profile data
-        setNotification({ title: 'Profile Deleted', message: 'Profile deleted successfully.' });
-      } catch (error) {
-        console.error("Error deleting profile:", error);
-        alert("Failed to delete profile.");
-      }
+    setDeleteProfileConfirm({ userId, userName });
+  };
+
+  const confirmDeleteProfile = () => {
+    if (!deleteProfileConfirm) return;
+    
+    try {
+      deleteUser(deleteProfileConfirm.userId);
+      setAllUsers(getUsers()); // Refresh user list
+      loadProfileData(); // Reload current profile data
+      setNotification({ title: 'Profile Deleted', message: 'Profile deleted successfully.' });
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      setNotification({ title: 'Error', message: 'Failed to delete profile.' });
     }
+    setDeleteProfileConfirm(null);
   };
 
   const handleLogout = () => {
-    if (confirm("Are you sure you want to logout? This will take you back to the profile selection screen.")) {
-      try {
-        // Clear current user selection
-        setCurrentUserId(null);
-        // Redirect to home page (which will show profile selector)
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Error logging out:", error);
-        setNotification({ title: 'Error', message: 'Failed to logout.' });
-      }
+    setLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    try {
+      // Clear current user selection
+      setCurrentUserId(null);
+      // Redirect to home page (which will show profile selector)
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error logging out:", error);
+      setNotification({ title: 'Error', message: 'Failed to logout.' });
     }
   };
 
   const handleDeleteCurrentProfile = () => {
     if (allUsers.length <= 1) {
-      alert("Cannot delete the last profile. Create another profile first if you want to delete this one.");
+      setNotification({ title: 'Cannot Delete', message: 'Cannot delete the last profile. Create another profile first if you want to delete this one.' });
       return;
     }
 
-    if (confirm(`Are you sure you want to delete the profile "${user?.name}"? This will permanently delete all your requests, tasks, and progress. Other profiles will be preserved. This cannot be undone.`)) {
-      try {
-        const success = deleteCurrentProfile();
-        if (success) {
-          alert("Profile deleted successfully. Redirecting to profile selection.");
-          window.location.href = "/";
-        } else {
-          setNotification({ title: 'Error', message: 'Failed to delete profile.' });
-        }
-      } catch (error) {
-        console.error("Error deleting current profile:", error);
-        alert("Failed to delete profile.");
+    setDeleteAccountConfirm(true);
+  };
+
+  const confirmDeleteCurrentProfile = () => {
+    try {
+      const success = deleteCurrentProfile();
+      if (success) {
+        setNotification({ title: 'Profile Deleted', message: 'Profile deleted successfully. Redirecting to profile selection.' });
+        setTimeout(() => window.location.href = "/", 2000);
+      } else {
+        setNotification({ title: 'Error', message: 'Failed to delete profile.' });
       }
+    } catch (error) {
+      console.error("Error deleting current profile:", error);
+      setNotification({ title: 'Error', message: 'Failed to delete profile.' });
     }
+    setDeleteAccountConfirm(false);
   };
 
   const handleClearData = () => {
@@ -256,7 +269,7 @@ export default function Profile() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleLogout}
-            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
+            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300  text-sm font-medium transition-colors"
             title="Logout and switch profiles"
           >
             Logout
@@ -266,17 +279,17 @@ export default function Profile() {
       </div>
 
       {/* User Info */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
+      <div className="bg-white dark:bg-gray-800 p-6  shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
         <div className="text-center">
           {user.profilePicture ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={user.profilePicture}
               alt={`${user.name}'s profile`}
-              className="w-16 h-16 rounded-full object-cover mx-auto mb-3 border-4 border-white dark:border-gray-700 shadow-lg"
+              className="w-16 h-16  object-cover mx-auto mb-3 border-4 border-white dark:border-gray-700 shadow-lg"
             />
           ) : (
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600  flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
               {user.name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -285,7 +298,7 @@ export default function Profile() {
 
           {/* Profile Picture Controls */}
           <div className="mt-4 flex justify-center gap-2">
-            <label className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <label className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm  cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <input
                 type="file"
                 accept="image/*"
@@ -298,7 +311,7 @@ export default function Profile() {
             {user.profilePicture && (
               <button
                 onClick={handleRemovePicture}
-                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors"
+                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm  transition-colors"
                 disabled={uploadingPicture}
               >
                 Remove Picture
@@ -317,11 +330,11 @@ export default function Profile() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+        <div className="bg-white dark:bg-gray-800 p-4  shadow-sm border border-gray-200 dark:border-gray-700 text-center">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalRequests}</div>
           <div className="text-sm text-gray-600 dark:text-gray-400">Total Lists</div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+        <div className="bg-white dark:bg-gray-800 p-4  shadow-sm border border-gray-200 dark:border-gray-700 text-center">
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completedRequests}</div>
           <div className="text-sm text-gray-600 dark:text-gray-400">Completed Lists</div>
         </div>
@@ -346,20 +359,20 @@ export default function Profile() {
         </div>
 
         {showProfileSwitcher && (
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 p-4  shadow-sm border border-gray-200 dark:border-gray-700">
             <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Switch Profile</h4>
             <div className="space-y-2">
               {allUsers.map((profileUser) => (
-                <div key={profileUser.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div key={profileUser.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 ">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600  flex items-center justify-center text-white font-bold text-sm">
                       {profileUser.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <div className="font-medium text-gray-900 dark:text-gray-100">
                         {profileUser.name}
                         {profileUser.id === user?.id && (
-                          <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                          <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs ">
                             Current
                           </span>
                         )}
@@ -373,7 +386,7 @@ export default function Profile() {
                     {profileUser.id !== user?.id && (
                       <button
                         onClick={() => handleSwitchProfile(profileUser.id)}
-                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm transition-colors"
                       >
                         Switch
                       </button>
@@ -381,7 +394,7 @@ export default function Profile() {
                     {allUsers.length > 1 && (
                       <button
                         onClick={() => handleDeleteProfile(profileUser.id, profileUser.name)}
-                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm transition-colors"
                       >
                         Delete
                       </button>
@@ -402,13 +415,13 @@ export default function Profile() {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Danger Zone</h3>
 
         {/* Delete Current Profile */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-red-200 dark:border-red-800 mb-4">
+        <div className="bg-white dark:bg-gray-800 p-4  shadow-sm border border-red-200 dark:border-red-800 mb-4">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
             Delete your current profile and all its data. Other profiles will be preserved.
           </p>
           <button
             onClick={handleDeleteCurrentProfile}
-            className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+            className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white  text-sm font-medium transition-colors"
             disabled={allUsers.length <= 1}
           >
             Delete Current Profile
@@ -421,24 +434,58 @@ export default function Profile() {
         </div>
 
         {/* Clear All Data */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-red-200 dark:border-red-800">
+        <div className="bg-white dark:bg-gray-800 p-4  shadow-sm border border-red-200 dark:border-red-800">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
             Clear all app data including requests, tasks, and XP progress. This cannot be undone.
           </p>
           <button
             onClick={handleClearData}
-            className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+            className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white  text-sm font-medium transition-colors"
           >
             Clear All Data
           </button>
         </div>
       </div>
 
+      {deleteProfileConfirm && (
+        <ConfirmationModal
+          title="Delete Profile"
+          message={`Are you sure you want to delete the profile "${deleteProfileConfirm.userName}"? This will permanently delete all their data and cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDeleteProfile}
+          onCancel={() => setDeleteProfileConfirm(null)}
+        />
+      )}
+
+      {logoutConfirm && (
+        <ConfirmationModal
+          title="Logout"
+          message="Are you sure you want to logout? This will take you back to the profile selection screen."
+          confirmText="Logout"
+          cancelText="Cancel"
+          onConfirm={confirmLogout}
+          onCancel={() => setLogoutConfirm(false)}
+        />
+      )}
+
+      {deleteAccountConfirm && (
+        <ConfirmationModal
+          title="Delete Current Profile"
+          message={`Are you sure you want to delete the profile "${user?.name}"? This will permanently delete all your requests, tasks, and progress. Other profiles will be preserved. This cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDeleteCurrentProfile}
+          onCancel={() => setDeleteAccountConfirm(false)}
+        />
+      )}
+
       {clearDataConfirm && (
         <ConfirmationModal
           title="Clear All Data"
           message="Are you sure you want to clear ALL data? This will reset your XP, level, requests, and tasks. This cannot be undone."
           confirmText="Clear Data"
+          cancelText="Cancel"
           onConfirm={confirmClearData}
           onCancel={() => setClearDataConfirm(false)}
         />

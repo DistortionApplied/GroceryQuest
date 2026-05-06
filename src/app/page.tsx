@@ -34,7 +34,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-md w-full text-center space-y-8">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+            <div className="animate-spin  h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
             <p>Loading...</p>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-md w-full text-center space-y-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+          <div className="animate-spin  h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
           <p>Loading...</p>
         </div>
       </div>

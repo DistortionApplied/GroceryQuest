@@ -53,7 +53,7 @@ export function RequestCard({
       {onDelete && (
         <button
           onClick={handleDelete}
-          className="delete-button absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-400 transition-colors"
+          className="delete-button absolute top-2 right-2 w-8 h-8 flex items-center justify-center  bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-400 transition-colors"
           aria-label="Delete request"
         >
           🗑️
@@ -65,7 +65,7 @@ export function RequestCard({
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{itemName}</h3>
               {isCompleted && (
-                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
+                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs ">
                   Completed
                 </span>
               )}
@@ -86,9 +86,9 @@ export function RequestCard({
               )}
             </div>
             {totalTasks > 0 && (
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700  h-2">
                 <div
-                  className="bg-green-600 dark:bg-green-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-green-600 dark:bg-green-500 h-2  transition-all duration-300"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>

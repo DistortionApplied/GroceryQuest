@@ -466,6 +466,12 @@ export function updateTask(task: Task): void {
   }
 }
 
+export function deleteTask(taskId: number): void {
+  const tasks = getTasks();
+  const filteredTasks = tasks.filter(t => t.id !== taskId);
+  saveToStorage(STORAGE_KEYS.tasks, filteredTasks);
+}
+
 export function reorderTasksForRequest(requestId: number, taskIds: number[]): void {
   const allTasks = getTasks();
   const requestTasks = allTasks.filter(t => t.requestId === requestId).sort((a, b) => {

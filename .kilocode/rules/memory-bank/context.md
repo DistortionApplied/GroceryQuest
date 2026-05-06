@@ -22,6 +22,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Replaced all browser alert/confirm dialogs with custom styled modals for consistent UI
 - [x] Updated app icon from target (🎯) to shopping cart (🛒) and ensured app name consistency
 - [x] Added user-uploaded profile pictures with image compression, validation, and localStorage storage
+- [x] Added optional description field when adding items to shopping lists, consistent with existing edit functionality
 
 ## Current Structure
 

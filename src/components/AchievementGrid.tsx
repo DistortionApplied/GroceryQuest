@@ -18,7 +18,7 @@ export function AchievementGrid({ achievements, unlockedIds }: AchievementGridPr
     <div className="mt-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800  hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800  active:bg-gray-100 dark:active:bg-gray-700 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">🏆</span>

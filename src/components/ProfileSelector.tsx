@@ -227,7 +227,7 @@ export function ProfileSelector({ onProfileSelected }: ProfileSelectorProps) {
             <button
               key={user.id}
               onClick={() => handleSelectProfile(user.id)}
-              className="w-full p-4 bg-white dark:bg-gray-800  border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
+              className="w-full p-4 bg-white dark:bg-gray-800  border border-gray-200 dark:border-gray-700 active:border-blue-300 dark:active:border-blue-600 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 {user.profilePicture ? (

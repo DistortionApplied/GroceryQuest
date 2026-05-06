@@ -269,7 +269,7 @@ export default function Profile() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleLogout}
-            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300  text-sm font-medium transition-colors"
+            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 text-gray-700 dark:text-gray-300  text-sm font-medium transition-colors"
             title="Logout and switch profiles"
           >
             Logout
@@ -298,7 +298,7 @@ export default function Profile() {
 
           {/* Profile Picture Controls */}
           <div className="mt-4 flex justify-center gap-2">
-            <label className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm  cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <label className="px-3 py-2 bg-blue-600 active:bg-blue-700 text-white text-sm  cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <input
                 type="file"
                 accept="image/*"
@@ -311,7 +311,7 @@ export default function Profile() {
             {user.profilePicture && (
               <button
                 onClick={handleRemovePicture}
-                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm  transition-colors"
+                className="px-3 py-2 bg-gray-600 active:bg-gray-700 text-white text-sm  transition-colors"
                 disabled={uploadingPicture}
               >
                 Remove Picture
@@ -352,7 +352,7 @@ export default function Profile() {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Profile Management</h3>
           <button
             onClick={() => setShowProfileSwitcher(!showProfileSwitcher)}
-            className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+            className="text-blue-600 dark:text-blue-400 active:underline text-sm"
           >
             {showProfileSwitcher ? 'Hide' : 'Manage Profiles'}
           </button>
@@ -386,7 +386,7 @@ export default function Profile() {
                     {profileUser.id !== user?.id && (
                       <button
                         onClick={() => handleSwitchProfile(profileUser.id)}
-                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm transition-colors"
+                        className="px-3 py-1 bg-blue-600 active:bg-blue-700 text-white text-sm transition-colors"
                       >
                         Switch
                       </button>
@@ -394,7 +394,7 @@ export default function Profile() {
                     {allUsers.length > 1 && (
                       <button
                         onClick={() => handleDeleteProfile(profileUser.id, profileUser.name)}
-                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm transition-colors"
+                        className="px-3 py-1 bg-red-600 active:bg-red-700 text-white text-sm transition-colors"
                       >
                         Delete
                       </button>
@@ -421,7 +421,7 @@ export default function Profile() {
           </p>
           <button
             onClick={handleDeleteCurrentProfile}
-            className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white  text-sm font-medium transition-colors"
+            className="w-full py-2 px-4 bg-red-600 active:bg-red-700 dark:bg-red-700 dark:active:bg-red-600 text-white  text-sm font-medium transition-colors"
             disabled={allUsers.length <= 1}
           >
             Delete Current Profile
@@ -440,7 +440,7 @@ export default function Profile() {
           </p>
           <button
             onClick={handleClearData}
-            className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white  text-sm font-medium transition-colors"
+            className="w-full py-2 px-4 bg-red-600 active:bg-red-700 dark:bg-red-700 dark:active:bg-red-600 text-white  text-sm font-medium transition-colors"
           >
             Clear All Data
           </button>

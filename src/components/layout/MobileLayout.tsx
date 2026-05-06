@@ -39,7 +39,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
                 className={`flex flex-col items-center p-2  transition-colors ${
                   pathname === item.href
                     ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    : "text-gray-600 dark:text-gray-400 active:text-gray-900 dark:active:text-gray-100"
                 }`}
               >
                 <span className="text-lg">{item.icon}</span>

@@ -11,6 +11,8 @@ import {
   getCurrentUser,
   getRequestsForCurrentUser,
   deleteRequest,
+  updateRequest,
+  getRequestById,
   initializeDefaultUser,
   initializeDefaultRewardCategories,
   getXpForNextLevel,
@@ -84,6 +86,22 @@ export default function Requests() {
     setDeleteConfirmRequestId(null);
   };
 
+  const handleEditRequest = (requestId: number, newName: string, newDescription?: string) => {
+    try {
+      updateRequest({ ...getRequestById(requestId)!, itemName: newName, description: newDescription });
+      const updatedRequests = getRequestsForCurrentUser();
+      setRequests(updatedRequests);
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('dataUpdated', {
+        detail: { type: 'request' }
+      }));
+      setNotification({ title: 'List Updated', message: 'List updated successfully.' });
+    } catch (error) {
+      console.error('Error updating request:', error);
+      setNotification({ title: 'Error', message: 'Failed to update list.' });
+    }
+  };
+
   const activeRequests = requests.filter(r => !r.isCompleted);
   const archivedRequests = requests.filter(r => r.isCompleted);
 
@@ -148,6 +166,7 @@ export default function Requests() {
                 totalTasks={request.requiredTasksCount}
                 completedAt={request.completedAt}
                 onDelete={handleDeleteRequest}
+                onEdit={handleEditRequest}
               />
             ))}
           </div>
@@ -162,7 +181,7 @@ export default function Requests() {
             className={`flex items-center gap-2 text-lg font-semibold transition-colors ${
               showArchived
                 ? "text-blue-600 dark:text-blue-400"
-                : "text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
+                : "text-gray-900 dark:text-gray-100 active:text-blue-600 dark:active:text-blue-400"
             }`}
           >
             <span>{showArchived ? '▼' : '▶'}</span>
@@ -183,6 +202,7 @@ export default function Requests() {
                   totalTasks={request.requiredTasksCount}
                   completedAt={request.completedAt}
                   onDelete={handleDeleteRequest}
+                  onEdit={handleEditRequest}
                 />
               ))}
             </div>

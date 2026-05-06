@@ -80,7 +80,7 @@ export function TaskItem({
                   e.stopPropagation();
                   onEdit(id);
                 }}
-                className="w-6 h-6 bg-green-100 dark:bg-green-900 hover:bg-green-200 dark:hover:bg-green-800 text-green-700 dark:text-green-300 flex items-center justify-center text-xs font-bold"
+                className="w-6 h-6 bg-green-100 dark:bg-green-900 active:bg-green-200 dark:active:bg-green-800 text-green-700 dark:text-green-300 flex items-center justify-center text-xs font-bold"
                 title="Edit item"
               >
                 ✎
@@ -92,7 +92,7 @@ export function TaskItem({
                   e.stopPropagation();
                   onDeleteRequested(id);
                 }}
-                className="w-6 h-6 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 flex items-center justify-center text-xs font-bold"
+                className="w-6 h-6 bg-red-100 dark:bg-red-900 active:bg-red-200 dark:active:bg-red-800 text-red-700 dark:text-red-300 flex items-center justify-center text-xs font-bold"
                 title="Delete item"
               >
                 ✕
@@ -109,7 +109,7 @@ export function TaskItem({
                   onMoveUp(id);
                 }}
                 disabled={!canMoveUp}
-                className="w-6 h-6 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-6 h-6 bg-blue-100 dark:bg-blue-900 active:bg-blue-200 dark:active:bg-blue-800 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ▲
               </button>
@@ -121,7 +121,7 @@ export function TaskItem({
                   onMoveDown(id);
                 }}
                 disabled={!canMoveDown}
-                className="w-6 h-6 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-6 h-6 bg-blue-100 dark:bg-blue-900 active:bg-blue-200 dark:active:bg-blue-800 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ▼
               </button>

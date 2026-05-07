@@ -23,6 +23,8 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Updated app icon from target (🎯) to shopping cart (🛒) and ensured app name consistency
 - [x] Added user-uploaded profile pictures with image compression, validation, and localStorage storage
 - [x] Added optional description field when adding items to shopping lists, consistent with existing edit functionality
+- [x] Set up Grocery Quest app icon in metadata
+- [x] Stored Android splash screen image (Distortion Applied design)
 
 ## Current Structure
 
@@ -83,11 +85,25 @@ export async function GET() {
 |--------|------|----------|
 | Add Database | `.kilocode/recipes/add-database.md` | Data persistence with Drizzle + SQLite |
 
+## App Assets for Native Android
+
+### App Icon
+- URL: `https://assets.kiloapps.io/user_de7487d4-ddd5-4a73-bf02-bb07e43b3386/37732363-9e5c-4ed4-9f1a-09430e123304/4248585e-3f45-497b-8d0b-b489bdea852b.png`
+- Design: Grocery Quest shopping cart with colorful produce
+- Used in: metadata (layout.tsx)
+
+### Splash Screen (Android Native)
+- URL: `https://assets.kiloapps.io/user_de7487d4-ddd5-4a73-bf02-bb07e43b3386/37732363-9e5c-4ed4-9f1a-09430e123304/c90801cd-4875-4e2d-8fa6-d87aad398851.png`
+- Design: "Distortion Applied" with glowing orange/red circular elements
+- Status: Stored for native Android integration
+- Next step: When setting up native Android build (Capacitor/React Native), place this in appropriate drawable directories
+
 ## Pending Improvements
 
 - [ ] Add more recipes (auth, email, etc.)
 - [ ] Add example components
 - [ ] Add testing setup recipe
+- [ ] Set up native Android build configuration
 
 ## Session History
 
